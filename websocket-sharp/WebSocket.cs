@@ -288,6 +288,24 @@ namespace WebSocketSharp
 
     #endregion
 
+    #region xle1162: Add TCPClient
+    public TcpClient TcpClient
+    {
+      get => _tcpClient;
+      set
+      {
+          if (value != null)
+          {
+              _tcpClient = value;
+          }
+          else
+          {
+              _tcpClient = new TcpClient();
+          }
+      }
+    }
+    #endregion
+
     #region Internal Properties
 
     internal CookieCollection CookieCollection {
@@ -1507,13 +1525,30 @@ namespace WebSocketSharp
     }
 
     // As client
+    // xle1162: modify to using property TcpClient
     private TcpClient createTcpClient (string hostname, int port)
     {
-      var ret = new TcpClient (hostname, port);
-
+      TcpClient ret;
+      
+      // Kiểm tra nếu _tcpClient đã được gán từ property
+      if (_tcpClient != null)
+      {
+          ret = _tcpClient;
+          // Nếu chưa kết nối, kết nối tới hostname và port
+          if (!ret.Connected)
+          {
+              ret.Connect(hostname, port);
+          }
+      }
+      else
+      {
+          // Nếu _tcpClient chưa được gán, tạo mới như cũ
+          ret = new TcpClient(hostname, port);
+      }
+  
       if (_noDelay)
-        ret.NoDelay = true;
-
+          ret.NoDelay = true;
+  
       return ret;
     }
 
