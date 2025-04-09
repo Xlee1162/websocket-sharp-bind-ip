@@ -1,0 +1,24 @@
+name: Publish to NuGet
+
+on:
+  # workflow_dispatch: # Chạy thủ công từ tab Actions
+  release:
+    types: [published] # Chỉ chạy khi bạn tạo một release trên GitHub
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x' # Thay bằng phiên bản .NET của dự án bạn
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build
+      - name: Publish to NuGet
+        run: dotnet nuget push bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
